@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "845887676725",
+    "project_id": "p-care-firebase",
+    "storage_bucket": "p-care-firebase.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:845887676725:android:103a9622b1223a26e0ec7c",
+        "android_client_info": {
+          "package_name": "com.example.p_care"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgOx5iUedCKGfB-f3tE014tG2CQdXcLjg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
