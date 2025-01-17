@@ -6,13 +6,14 @@ import 'package:get/get.dart';
 //import 'package:p_care/screens/choose.dart';
 import 'package:p_care/screens/additionalScreens/onboardScreen.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:p_care/screens/additionalScreens/splash_screen.dart';
 //import 'package:p_care/screens/patiants/regScreen_patients.dart';
 
 //import 'WelcomeScreen.dart';
 void main()async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    /*options: FirebaseOptions(
+   /* options: FirebaseOptions(
       apiKey: "AIzaSyDeRUs0q0FqdlPOCNFe5d7yx8p2D4O4pT0",
       authDomain: "p-care-firebase.firebaseapp.com",
       projectId: "p-care-firebase",
@@ -47,7 +48,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void initialization()async{
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(Duration(seconds: 1));
     FlutterNativeSplash.remove();
   }
   @override

@@ -1,27 +1,68 @@
 import 'package:flutter/material.dart';
-import 'package:p_care/screens/patiants/WelcomeScreen_patiants.dart';
 
-class RadioButon extends StatefulWidget {
-  const RadioButon({super.key});
-
+class GenderSelection extends StatefulWidget {
   @override
-  State<RadioButon> createState() => _RadioButonState();
+  _GenderSelectionState createState() => _GenderSelectionState();
 }
-String selectedValue = 'value';
 
-class _RadioButonState extends State<RadioButon> {
+class _GenderSelectionState extends State<GenderSelection> {
+  String _selectedGender = "Male"; // Default gender selection
+
   @override
   Widget build(BuildContext context) {
-    return RadioListTile(
-      title: Text('patient'),
-      value: 'Patient',
-      groupValue: selectedValue,
-      onChanged: (value){
-        Navigator.push(context,MaterialPageRoute(builder: (context)=>WelcomeScreen()));
-        setState(() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text('Sex',
+        style: TextStyle(
           
-        });
-      },
+          fontWeight: FontWeight.bold,
+          color:Color.fromARGB(255, 37, 100, 228),
+        ),),
+        Expanded(
+          child: ListTile(
+            title: Text("Male",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color:Color.fromARGB(255, 37, 100, 228),
+              
+            ),),
+            leading: Radio<String>(
+              activeColor:Color.fromARGB(255, 37, 100, 228) ,
+              value: "Male",
+              groupValue: _selectedGender,
+              onChanged: (String? value) {
+                setState(() {
+                  _selectedGender = value!;
+                });
+              },
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListTile(
+            title: Text("Female",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color:Color.fromARGB(255, 37, 100, 228),
+            ),),
+            leading: Radio<String>(
+              activeColor: Color.fromARGB(255, 37, 100, 228),
+              value: "Female",
+              groupValue: _selectedGender,
+              onChanged: (String? value) {
+                setState(() {
+                  _selectedGender = value!;
+                });
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
+
+
