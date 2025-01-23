@@ -31,8 +31,8 @@ class InitialScreen1 extends StatelessWidget {
             ),),
               //Image(image: AssetImage('assets/images/pcare.png')),
             Image.asset('assets/images/pcare.png',
-            height: 300,
-            width: 300,),
+            height: 200,
+            width: 200,),
             Text('Personalized Care for Your Needs',
             style: TextStyle(
               fontWeight: FontWeight.w400,

@@ -19,7 +19,7 @@ class _ChooseScreenState extends State<ChooseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        height: double.infinity,
+        height:double.infinity,
         width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -75,7 +75,7 @@ class _ChooseScreenState extends State<ChooseScreen> {
                         fontWeight: FontWeight.bold,
                         fontSize: 20
                       ),)),
-
+      
                     ),
                   ),
                   SizedBox(

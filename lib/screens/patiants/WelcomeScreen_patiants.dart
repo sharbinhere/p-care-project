@@ -33,108 +33,110 @@ class _WelcomeScreenPatientState extends State<WelcomeScreenPatient> {
     return Scaffold(
 
       resizeToAvoidBottomInset: false,
-       body: Container(
-         height: double.infinity,
-         width: double.infinity,
-         decoration: const BoxDecoration(
-          
-           
-           
-           gradient: LinearGradient(
-             colors: [
-               Color.fromARGB(255, 37, 100, 228),
-               Color.fromARGB(255, 77, 129, 231),
-               Color.fromARGB(255, 91, 137, 228),
-               Color.fromARGB(255, 142, 172, 233),
-             ]
-           )
-         ),
-         child: Column(
-          
-           
-           children: [
+       body: SingleChildScrollView(
+         child: Container(
+           height: 800,
+           width: double.infinity,
+           decoration: const BoxDecoration(
+            
              
              
+             gradient: LinearGradient(
+               colors: [
+                 Color.fromARGB(255, 37, 100, 228),
+                 Color.fromARGB(255, 77, 129, 231),
+                 Color.fromARGB(255, 91, 137, 228),
+                 Color.fromARGB(255, 142, 172, 233),
+               ]
+             )
+           ),
+           child: Column(
+            
              
-             const Padding(
-               padding: EdgeInsets.only(top: 150),
+             children: [
                
-             ),
-             
-              
-             
-               Text(
-                 'GET START',
-               style: TextStyle(
-                color: Colors.white,
-                fontSize: 40,
-                fontWeight: FontWeight.bold
-               )),
-            const SizedBox(height: 50,),
-            Image.asset('assets/images/patiant.png',
-            height: 200,
-            width: 200,),
-            SizedBox(
-              height: 30,
-            ),
-            GestureDetector(
-              onTap: (){
-                Get.to(
-                      (){
-                        return RegScreenPatient();
-                      },
-                      transition: Transition.fade,
-                      duration: Duration(milliseconds: 650)
-                    );
-              },
-              child: Container(
-                height: 53,
-                width: 320,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: Colors.white),
-                ),
-                child: const Center(child: Text('SIGN UP',style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                ),),),
-              ),
-            ),
-             const SizedBox(height: 30,),
-             GestureDetector(
-               onTap: (){
-                 Get.to(
-                      (){
-                        return loginScreenPatient();
-                      },
-                      transition: Transition.fade,
-                      duration: Duration(milliseconds: 650)
-                    );
-                     
-               },
-               child: Container(
-                 height: 53,
-                 width: 320,
-                 decoration: BoxDecoration(
-                   color: Colors.white,
-                   borderRadius: BorderRadius.circular(30),
-                   border: Border.all(color: Color.fromARGB(255, 77, 129, 231)),
-                 ),
-                 child: const Center(child: Text('SIGN IN',style: TextStyle(
-                     fontSize: 20,
-                     fontWeight: FontWeight.bold,
-                     color:  Color.fromARGB(255, 77, 129, 231),
-                 ),),),
+               
+               
+               const Padding(
+                 padding: EdgeInsets.only(top: 150),
+                 
                ),
-             ),
-             const Spacer(),
-            const SizedBox(height: 12,),
-            Image(image: AssetImage('assets/images/pcare.png'),
-             height: 150,
-             width: 150,),
-             
-            ]
+               
+                
+               
+                 Text(
+                   'GET START',
+                 style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold
+                 )),
+              const SizedBox(height: 50,),
+              Image.asset('assets/images/patiant.png',
+              height: 200,
+              width: 200,),
+              SizedBox(
+                height: 30,
+              ),
+              GestureDetector(
+                onTap: (){
+                  Get.to(
+                        (){
+                          return RegScreenPatient();
+                        },
+                        transition: Transition.fade,
+                        duration: Duration(milliseconds: 650)
+                      );
+                },
+                child: Container(
+                  height: 53,
+                  width: 320,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Colors.white),
+                  ),
+                  child: const Center(child: Text('SIGN UP',style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                  ),),),
+                ),
+              ),
+               const SizedBox(height: 30,),
+               GestureDetector(
+                 onTap: (){
+                   Get.to(
+                        (){
+                          return loginScreenPatient();
+                        },
+                        transition: Transition.fade,
+                        duration: Duration(milliseconds: 650)
+                      );
+                       
+                 },
+                 child: Container(
+                   height: 53,
+                   width: 320,
+                   decoration: BoxDecoration(
+                     color: Colors.white,
+                     borderRadius: BorderRadius.circular(30),
+                     border: Border.all(color: Color.fromARGB(255, 77, 129, 231)),
+                   ),
+                   child: const Center(child: Text('SIGN IN',style: TextStyle(
+                       fontSize: 20,
+                       fontWeight: FontWeight.bold,
+                       color:  Color.fromARGB(255, 77, 129, 231),
+                   ),),),
+                 ),
+               ),
+               const Spacer(),
+              const SizedBox(height: 12,),
+              Image(image: AssetImage('assets/images/pcare.png'),
+               height: 150,
+               width: 150,),
+               
+              ]
+           ),
          ),
        ),
       

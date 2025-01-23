@@ -1,32 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-//import 'package:p_care/example.dart';
+import 'package:p_care/example.dart';
 import 'package:p_care/materials/radio_button.dart';
-import 'package:p_care/services/patiants/auth_controller.dart';
-//import 'package:p_care/services/auth_service.dart';
+import 'package:p_care/services/caretakers/c_auth_controller.dart';
 
-class RegScreenPatient extends StatefulWidget {
-  const RegScreenPatient({Key? key}) : super(key: key);
+class RegscreenCaretaker extends StatefulWidget {
+  const RegscreenCaretaker({Key? key}) : super(key: key);
 
   @override
-  State<RegScreenPatient> createState() => _RegScreenPatientState();
+  State<RegscreenCaretaker> createState() => _RegscreenCaretakerState();
 }
 
-class _RegScreenPatientState extends State<RegScreenPatient> {
+class _RegscreenCaretakerState extends State<RegscreenCaretaker> {
   bool _obscureText1 = true;
   bool _obscureText2 = true;
 
   final _formKey = GlobalKey<FormState>();
 
-  final _ctrl = Get.put(PatiantAuthController());
+ 
+ //object of CareTaker AuthController
+  final _ctrl = Get.put(CaretakerAuthController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: SingleChildScrollView(
       child: Container(
-        height: 990,
+        height: 900,
         color: Colors.white,
         child: Stack(
           children: [
@@ -79,17 +80,14 @@ class _RegScreenPatientState extends State<RegScreenPatient> {
                             return null;
                           },
                           decoration: InputDecoration(
-                              suffixIcon: Icon(
-                                Icons.person,
-                                color: Colors.grey,
-                              ),
+                              //suffixIcon: Icon(Icons.check,color: Colors.grey,),
                               label: Text(
-                                'Full Name',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 37, 100, 228),
-                                ),
-                              )),
+                            'Full Name',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 37, 100, 228),
+                            ),
+                          )),
                         ),
                         TextFormField(
                           controller: _ctrl.addressController,
@@ -103,17 +101,14 @@ class _RegScreenPatientState extends State<RegScreenPatient> {
                           maxLines: 4,
                           minLines: 1,
                           decoration: InputDecoration(
-                              suffixIcon: Icon(
-                                Icons.home,
-                                color: Colors.grey,
-                              ),
+                              //suffixIcon: Icon(Icons.check,color: Colors.grey,),
                               label: Text(
-                                'Address',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 37, 100, 228),
-                                ),
-                              )),
+                            'Address',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 37, 100, 228),
+                            ),
+                          )),
                         ),
                         TextFormField(
                           controller: _ctrl.emailController,
@@ -135,33 +130,30 @@ class _RegScreenPatientState extends State<RegScreenPatient> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your email';
-                            } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$')
+                            } else if (!RegExp(
+                                    r'^[^@]+@[^@]+\.[^@]+$')
                                 .hasMatch(value)) {
                               return 'Please enter a valid email';
                             }
                             return null;
                           },
                         ),
-
+                        
                         TextFormField(
-                          keyboardType: TextInputType.phone,
+                          keyboardType: TextInputType.number,
                           inputFormatters: [
                             FilteringTextInputFormatter
                                 .digitsOnly, // Restrict input to digits
                           ],
                           controller: _ctrl.phoneController,
                           decoration: InputDecoration(
-                              suffixIcon: Icon(
-                                Icons.email,
-                                color: Colors.grey,
-                              ),
                               label: Text(
-                                'Phone',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 37, 100, 228),
-                                ),
-                              )),
+                            'Phone',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 37, 100, 228),
+                            ),
+                          )),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your phone number';
@@ -174,17 +166,15 @@ class _RegScreenPatientState extends State<RegScreenPatient> {
                         TextFormField(
                           controller: _ctrl.ageController,
                           decoration: InputDecoration(
-                              suffixIcon: Icon(
-                                Icons.accessibility,
-                                color: Colors.grey,
-                              ),
+
+                              //suffixIcon: Icon(Icons.visibility,color: Colors.grey,),
                               label: Text(
-                                'Age',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 37, 100, 228),
-                                ),
-                              )),
+                            'Age',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 37, 100, 228),
+                            ),
+                          )),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your age';
@@ -193,36 +183,14 @@ class _RegScreenPatientState extends State<RegScreenPatient> {
                           },
                         ),
                         SizedBox(
-                          height: 15,
+                          height: 0,
                         ),
                         GenderSelection(),
-                        TextFormField(
-                          controller: _ctrl.diagnosisController,
-                          decoration: InputDecoration(
-                              suffixIcon: Icon(
-                                Icons.sick,
-                                color: Colors.grey,
-                              ),
-                              label: Text(
-                                'Diagnosis',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 37, 100, 228),
-                                ),
-                              )),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your disease';
-                            }
-                            return null;
-                          },
-                        ),
                         TextFormField(
                           controller: _ctrl.passwordController,
                           obscureText: _obscureText1,
                           decoration: InputDecoration(
                               suffixIcon: IconButton(
-                                  color: Colors.grey,
                                   onPressed: () {
                                     setState(() {
                                       _obscureText1 = !_obscureText1;
@@ -252,7 +220,6 @@ class _RegScreenPatientState extends State<RegScreenPatient> {
                           obscureText: _obscureText2,
                           decoration: InputDecoration(
                               suffixIcon: IconButton(
-                                  color: Colors.grey,
                                   onPressed: () {
                                     setState(() {
                                       _obscureText2 = !_obscureText2;
@@ -271,7 +238,7 @@ class _RegScreenPatientState extends State<RegScreenPatient> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please confirm your password';
-                            } else if (value != _ctrl.passwordController.text) {
+                            } else if (value != _ctrl.confirmPasswordController.text) {
                               return 'Passwords do not match';
                             }
                             return null;
@@ -295,32 +262,22 @@ class _RegScreenPatientState extends State<RegScreenPatient> {
                             ]),
                           ),
                           child: GestureDetector(
-                            onTap: () async {
+                            onTap: () {
                               if (_formKey.currentState?.validate() == true) {
-                                // Trigger the sign-up process
-                                await _ctrl.signUp();
-
-                                // Show OTP dialog after initiating the sign-up
-                                if (_ctrl.verificationId != null) {
-                                  await showOtpDialog(context, (otp) {
-                                    _ctrl.verifyOtp(otp);
-                                  });
-                                }
+                                // Navigate to the next screen if valid
+                                _ctrl.signUp();
                               }
                             },
-                            child: Obx(
-                              () => Center(
-                                child: _ctrl.loading.value
-                                    ? CircularProgressIndicator(
-                                        color: Colors.white,
-                                      )
-                                    : Text(
-                                        'SIGN UP',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20,
-                                            color: Colors.white),
-                                      ),
+                            child:  Obx(
+                              ()=> Center(
+                                child:_ctrl.loading.value?CircularProgressIndicator(color: Colors.white,)
+                                : Text(
+                                  'SIGN UP',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                      color: Colors.white),
+                                ),
                               ),
                             ),
                           ),
@@ -336,34 +293,4 @@ class _RegScreenPatientState extends State<RegScreenPatient> {
       ),
     ));
   }
-}
-
-//OTP entering UI.
-Future<void> showOtpDialog(
-    BuildContext context, Function(String) onSubmit) async {
-  String otp = '';
-  return showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text("Enter OTP"),
-      content: TextField(
-        onChanged: (value) => otp = value,
-        keyboardType: TextInputType.number,
-        decoration: const InputDecoration(hintText: "Enter 6-digit OTP"),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("Cancel"),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-            onSubmit(otp);
-          },
-          child: const Text("Submit"),
-        ),
-      ],
-    ),
-  );
 }

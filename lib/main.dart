@@ -6,14 +6,14 @@ import 'package:get/get.dart';
 //import 'package:p_care/screens/choose.dart';
 import 'package:p_care/screens/additionalScreens/onboardScreen.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:p_care/screens/additionalScreens/splash_screen.dart';
+//import 'package:p_care/screens/additionalScreens/splash_screen.dart';
 //import 'package:p_care/screens/patiants/regScreen_patients.dart';
 
 //import 'WelcomeScreen.dart';
 void main()async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-   /* options: FirebaseOptions(
+    /*options: FirebaseOptions(
       apiKey: "AIzaSyDeRUs0q0FqdlPOCNFe5d7yx8p2D4O4pT0",
       authDomain: "p-care-firebase.firebaseapp.com",
       projectId: "p-care-firebase",
@@ -56,6 +56,18 @@ class _MyAppState extends State<MyApp> {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        inputDecorationTheme: InputDecorationTheme(
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Color.fromARGB(255, 37, 100, 228))
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Color.fromARGB(255, 37, 100, 228),
+            width: 2),
+          )
+        ),
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: Color.fromARGB(255, 37, 100, 228),
+        ),
         fontFamily: ('inter'),
         useMaterial3: true,
       ),

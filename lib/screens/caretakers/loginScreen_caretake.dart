@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:p_care/screens/patiants/regScreen_patients.dart';
+import 'package:p_care/services/caretakers/c_auth_controller.dart';
+import 'package:p_care/services/caretakers/caretake_reset_password.dart';
+//import 'package:p_care/screens/patiants/regScreen_patients.dart';
 
-class loginScreenCareTaker extends StatelessWidget {
-  const loginScreenCareTaker({Key? key}) : super(key: key);
+class loginScreenCaretaker extends StatefulWidget {
+  const loginScreenCaretaker({Key? key}) : super(key: key);
 
+  @override
+  State<loginScreenCaretaker> createState() => _loginScreenCaretakerState();
+}
+
+class _loginScreenCaretakerState extends State<loginScreenCaretaker> {
+  bool _obscure_Text=true;
+
+  final _ctrl = Get.put(CaretakerAuthController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,19 +58,52 @@ class loginScreenCareTaker extends StatelessWidget {
               child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const TextField(
-                    
+                   TextField(
+                    controller: _ctrl.loginemail,              
                     decoration: InputDecoration(
-                      //suffixIcon: Icon(Icons.check,color: Colors.grey,),
-                      label: Text('Caretaker ID',style: TextStyle(
+                      suffixIcon: Icon(Icons.email,color: Colors.grey,),
+                      label: Text('Email',style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color:Color.fromARGB(255, 37, 100, 228)
                       ),)
                     ),
                   ),
-                  
+                  TextField(
+                    controller: _ctrl.loginpass,
+                    obscureText: _obscure_Text,
+                    
+                    decoration:  InputDecoration(
+                        suffixIcon: IconButton(
+                          onPressed: (){
+                            setState(() {
+                              _obscure_Text=!_obscure_Text;
+                            });
+                          }, 
+                          icon: _obscure_Text?Icon(Icons.visibility_off):Icon(Icons.visibility),
+                          color: Colors.grey,),
+                        label: Text('Password',style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color:Color.fromARGB(255, 37, 100, 228)
+                          
+                        ),)
+                    ),
+                  ),
                   const SizedBox(height: 20,),
-                  
+                  GestureDetector(
+                    onTap: () {
+                      Get.to(CaretakeResetPassword(),
+                      transition: Transition.fade,
+                      duration: Duration(milliseconds: 650));
+                    },
+                    child: const Align(
+                      alignment: Alignment.centerRight,
+                      child: Text('Forgot Password?',style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        color: Color(0xff281537),
+                      ),),
+                    ),
+                  ),
                   const SizedBox(height: 50,),
                   Container(
                     height: 55,
@@ -73,14 +119,47 @@ class loginScreenCareTaker extends StatelessWidget {
                         ]
                       ),
                     ),
-                    child: const Center(child: Text('SIGN IN',style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Colors.white
-                    ),),),
+                    child: GestureDetector(
+                      onTap: (){
+                        _ctrl.signIn();
+                      },
+                      child:  Obx(
+                        ()=> Center(child:_ctrl.loading.value?CircularProgressIndicator(color: Colors.white,)
+                        : Text('SIGN IN',style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Colors.white
+                        ),),),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 30,),
-                  
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text("Don't have account?",style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey
+                          ),),
+                          TextButton(
+                            onPressed: (){
+                              Get.to(RegScreenPatient(),
+                              transition: Transition.fade,
+                              duration: Duration(seconds: 1));
+                            }, 
+                            child: const Text('Sign Up',
+                            style: TextStyle(
+                              fontSize: 17,
+                              color: Colors.black
+                            ),)),
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
