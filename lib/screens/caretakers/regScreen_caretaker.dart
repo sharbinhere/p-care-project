@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:p_care/example.dart';
+//import 'package:p_care/example.dart';
 import 'package:p_care/materials/radio_button.dart';
 import 'package:p_care/services/caretakers/c_auth_controller.dart';
 

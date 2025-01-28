@@ -298,14 +298,7 @@ class _RegScreenPatientState extends State<RegScreenPatient> {
                             onTap: () async {
                               if (_formKey.currentState?.validate() == true) {
                                 // Trigger the sign-up process
-                                await _ctrl.signUp();
-
-                                // Show OTP dialog after initiating the sign-up
-                                if (_ctrl.verificationId != null) {
-                                  await showOtpDialog(context, (otp) {
-                                    _ctrl.verifyOtp(otp);
-                                  });
-                                }
+                                _ctrl.signUp();
                               }
                             },
                             child: Obx(

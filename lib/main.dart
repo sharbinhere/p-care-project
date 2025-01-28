@@ -1,28 +1,18 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-//import 'package:p_care/choose.dart';
-//import 'package:p_care/screens/choose.dart';
-import 'package:p_care/screens/additionalScreens/onboardScreen.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-//import 'package:p_care/screens/additionalScreens/splash_screen.dart';
-//import 'package:p_care/screens/patiants/regScreen_patients.dart';
+import 'package:p_care/screens/additionalScreens/onboardScreen.dart';
+import 'package:p_care/screens/caretakers/caretake_home_screen.dart';
+import 'package:p_care/screens/patiants/patiant_home_screen.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-//import 'WelcomeScreen.dart';
-void main()async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    /*options: FirebaseOptions(
-      apiKey: "AIzaSyDeRUs0q0FqdlPOCNFe5d7yx8p2D4O4pT0",
-      authDomain: "p-care-firebase.firebaseapp.com",
-      projectId: "p-care-firebase",
-      storageBucket: "p-care-firebase.firebasestorage.app",
-      messagingSenderId: "845887676725",
-      appId: "1:845887676725:web:3c16357c68058247e0ec7c",
-  )*/
-  );
-  
+  await Firebase.initializeApp();
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -39,40 +29,106 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // This widget is the root of your application.
+  late Future<Widget> _initialScreen;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     initialization();
+    _initialScreen = _getInitialScreen();
   }
 
-  void initialization()async{
-    await Future.delayed(Duration(seconds: 1));
+  // Determines the initial screen based on user authentication and role
+  Future<Widget> _getInitialScreen() async {
+  // Simulate a delay (optional)
+  await Future.delayed(const Duration(seconds: 1));
+
+  // Check if the user is signed in
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    return OnBoardingScreen(); // User not signed in
+  }
+
+  // Debugging: Log current user UID
+  //print("User UID: ${user.uid}");
+
+  // Fetch user document from both the 'Patiants' and 'CareTakers' collections
+  final patientDoc = await FirebaseFirestore.instance
+      .collection('Patiants')
+      .doc(user.uid)
+      .get();
+
+  final caretakerDoc = await FirebaseFirestore.instance
+      .collection('CareTakers')
+      .doc(user.uid)
+      .get();
+
+  // Debugging: Log existence of patient and caretaker documents
+ /// print("Is Patient: ${patientDoc.exists}");
+  ///print("Is Caretaker: ${caretakerDoc.exists}");
+
+  // Check if the user is found in 'Patiants'
+  if (patientDoc.exists) {
+    print("User is a Patient");
+    return PatiantHomeScreen(); // User is a patient
+  }
+
+  // If the user is not found in 'Patiants', check in 'CareTakers'
+  if (caretakerDoc.exists) {
+    //print("User is a Caretaker");
+    return CaretakeHomeScreen(); // User is a caretaker
+  }
+
+  // If no matching document is found in either collection
+ // print("No matching document found in Patiants or CareTakers");
+  return OnBoardingScreen();
+}
+
+
+  void initialization() async {
+    await Future.delayed(const Duration(seconds: 1));
     FlutterNativeSplash.remove();
   }
+
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         inputDecorationTheme: InputDecorationTheme(
-          enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: Color.fromARGB(255, 37, 100, 228))
-          ),
-          focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: Color.fromARGB(255, 37, 100, 228),
-            width: 2),
-          )
-        ),
+            enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Color.fromARGB(255, 37, 100, 228)))),
         textSelectionTheme: TextSelectionThemeData(
           cursorColor: Color.fromARGB(255, 37, 100, 228),
         ),
         fontFamily: ('inter'),
         useMaterial3: true,
       ),
-      home: OnBoardingScreen(),
-      
+      home: FutureBuilder<Widget>(
+        future: _initialScreen, // Use the future from initState
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return  Scaffold(
+              body: Center(child : LoadingAnimationWidget.waveDots(
+                color: Color.fromARGB(255, 37, 100, 228),
+                 size: 80)), // Loading indicator
+            );
+          }
+          if (snapshot.hasError) {
+            return const Scaffold(
+              body: Center(child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.signal_wifi_connected_no_internet_4),
+                  Text("No internet connection")
+                ],
+              )), // Error screen
+            );
+          }
+          return snapshot.data ?? const OnBoardingScreen();
+        },
+      ),
     );
   }
 }
+

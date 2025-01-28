@@ -35,7 +35,7 @@ class _WelcomeScreenPatientState extends State<WelcomeScreenPatient> {
       resizeToAvoidBottomInset: false,
        body: SingleChildScrollView(
          child: Container(
-           height: 800,
+           height: 820,
            width: double.infinity,
            decoration: const BoxDecoration(
             

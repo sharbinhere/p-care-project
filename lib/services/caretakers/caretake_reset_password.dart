@@ -7,6 +7,7 @@ class CaretakeResetPassword extends StatelessWidget {
   CaretakeResetPassword({super.key});
   final _email = TextEditingController();
   final _ctrl = Get.put(CaretakerAuthController());
+  //final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +63,9 @@ class CaretakeResetPassword extends StatelessWidget {
                     )),
               ),
             ),
-            SizedBox(height: 30,),
+            SizedBox(
+              height: 30,
+            ),
             Container(
               height: 40,
               width: 200,
@@ -71,21 +74,21 @@ class CaretakeResetPassword extends StatelessWidget {
                 borderRadius: BorderRadius.circular(30),
               ),
               child: GestureDetector(
-                onTap: () async{
-                 await _ctrl.sendPasswordReset(_email.text);
-                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("A link send to your email to reset password")));
-                 Get.to(loginScreenCaretaker(),
-                 transition: Transition.rightToLeft);
+                onTap: () async {
+                    await _ctrl.sendPasswordReset(_email.text.trim());
+                    Get.to(loginScreenCaretaker(),
+                        transition: Transition.rightToLeft);
+                  
                 },
                 child: Center(
-                        child: Text(
-                          'Sent Email',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: Color.fromARGB(255, 37, 100, 228)),
-                        ),
-                      ),
+                  child: Text(
+                    'Sent Email',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Color.fromARGB(255, 37, 100, 228)),
+                  ),
+                ),
               ),
             ),
           ],

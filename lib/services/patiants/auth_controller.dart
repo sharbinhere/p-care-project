@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:p_care/example.dart';
+import 'package:p_care/screens/additionalScreens/onboardScreen.dart';
+import 'package:p_care/screens/patiants/patiant_home_screen.dart';
 import 'package:p_care/services/patiants/usermodel.dart';
 
 class PatiantAuthController extends GetxController {
@@ -23,146 +24,149 @@ class PatiantAuthController extends GetxController {
   String? verificationId;
 
   // Account creation with OTP verification
-  Future<void> signUp() async {
-    try {
-      if (phoneController.text.isEmpty || phoneController.text.length != 10) {
-        Get.snackbar("Error", "Please enter a valid 10-digit phone number");
-        return;
-      }
-
-      loading.value = true;
-
-      // Trigger OTP verification
-      await auth.verifyPhoneNumber(
-        phoneNumber: '+91${phoneController.text}', // Update country code as needed
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          // Auto verification for some devices
-          await auth.signInWithCredential(credential);
-          Get.snackbar("Phone Verified", "Your phone number has been verified!");
-          await _completeSignUp();
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          Get.snackbar("Verification Failed", e.message ?? "An error occurred");
-          loading.value = false;
-        },
-        codeSent: (String verificationId, int? resendToken) {
-          this.verificationId = verificationId;
-          Get.snackbar("OTP Sent", "Please check your phone for the OTP");
-          loading.value = false;
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          this.verificationId = verificationId;
-        },
-      );
-    } catch (e) {
-      Get.snackbar("Error", "An error occurred: $e");
-      loading.value = false;
+  signUp()async{
+    try{
+      loading.value=true;
+    await auth.createUserWithEmailAndPassword(email: emailController.text.trim(), password: passwordController.text.trim());
+    await addUser();
+    verifyEmail();
+    
     }
-  }
-
-  // Verify the entered OTP
-  Future<void> verifyOtp(String otp) async {
-    try {
-      loading.value = true;
-
-      final credential = PhoneAuthProvider.credential(
-        verificationId: verificationId!,
-        smsCode: otp,
-      );
-
-      // Verify OTP and sign in
-      await auth.signInWithCredential(credential);
-      Get.snackbar("Phone Verified", "Your phone number has been verified!");
-
-      // Complete the sign-up process
-      await _completeSignUp();
-    } catch (e) {
-      Get.snackbar("Invalid OTP", "The OTP entered is incorrect. Please try again.");
-    } finally {
-      loading.value = false;
+    catch(e){
+      Get.snackbar("Error occured", "$e",
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Color.fromARGB(255, 37, 100, 228),
+      colorText: Colors.white);
+      loading.value=false;
     }
-  }
 
-  // Complete the sign-up process after OTP verification
-  Future<void> _completeSignUp() async {
-    try {
-      // Create user with email and password
-      await auth.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+   }
 
-      // Save user details in Firestore
-      await addUser();
-
-      // Send email verification
-      await verifyEmail();
-
-      // Navigate to the next screen
-      Get.to(
-        ExampleScreen(),
-        transition: Transition.fade,
-        duration: const Duration(milliseconds: 650),
-      );
-    } catch (e) {
-      Get.snackbar("Error", "Sign-up failed: $e");
-    }
-  }
-
-  // Add user details to Firestore
-  Future<void> addUser() async {
-    PatiantUsermodel user = PatiantUsermodel(
+   //Add user details on firebase database
+   addUser()async{
+     PatiantUsermodel user = PatiantUsermodel(
+      role: 'patiant',
       name: fullNameController.text,
       address: addressController.text,
       email: auth.currentUser?.email,
       phone: phoneController.text,
       age: ageController.text,
       diagnosis: diagnosisController.text,
+      
+      
+
     );
-    await db
-        .collection("Patiants")
-        .doc(auth.currentUser?.uid)
-        .collection("Profile")
-        .add(user.toMap());
-  }
+    await db.collection("Patiants").doc(auth.currentUser?.uid).collection("Profile").add(user.toMap());
 
-  // Sign out
-  Future<void> signOut() async {
+    await db.collection('CareTakers').doc(auth.currentUser?.uid).set({
+    'role': 'patiant', // Change this dynamically if needed
+  });
+   }
+   
+   //Signout 
+   signOut()async{
     await auth.signOut();
-  }
+    Get.to(OnBoardingScreen());
+    
+   }
 
-  // Sign in
-  Future<void> signIn() async {
-    try {
-      loading.value = true;
-      await auth.signInWithEmailAndPassword(
-        email: loginemail.text.trim(),
-        password: loginpass.text.trim(),
-      );
-      Get.to(
-        ExampleScreen(),
-        transition: Transition.fade,
-        duration: const Duration(milliseconds: 650),
-      );
-    } catch (e) {
-      Get.snackbar("Error occurred", "$e");
-    } finally {
-      loading.value = false;
-    }
-  }
-
-  // Email verification
-  Future<void> verifyEmail() async {
-    await auth.currentUser?.sendEmailVerification();
-  }
-
-  //Password Reset
-  Future<void> sendPasswordReset(String email)async{
+   //Signin
+   signIn()async{
     try{
-      await auth.sendPasswordResetEmail(email: email);
+      loading.value=true;
+      await auth.signInWithEmailAndPassword(email: loginemail.text.trim(), password: loginpass.text.trim());
+      Get.to(PatiantHomeScreen(),
+      transition: Transition.fade,
+      duration: Duration(milliseconds: 650));
+      loading.value=false;
     }
     catch(e){
-      Get.snackbar("Error Occured", "$e");
+      
+      Get.snackbar("Error occured", "$e",
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Color.fromARGB(255, 37, 100, 228),
+      colorText: Colors.white);
+      loading.value=false;
     }
+   }
+
+   //Email Verification
+   verifyEmail() async {
+  try {
+    // Send verification email
+    await auth.currentUser?.sendEmailVerification();
+
+    Get.snackbar(
+      "Verification",
+      "A verification email has been sent to ${auth.currentUser?.email}. Please verify your email to continue.",
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Color.fromARGB(255, 37, 100, 228),
+      colorText: Colors.white,
+    );
+
+    // Polling to check for verification status
+    bool isEmailVerified = false;
+
+    while (!isEmailVerified) {
+      await Future.delayed(const Duration(seconds: 3)); // Wait for a few seconds
+      await auth.currentUser?.reload(); // Reload the user's data
+      isEmailVerified = auth.currentUser?.emailVerified ?? false;
+
+      if (isEmailVerified) {
+        Get.snackbar(
+          "Email Verified",
+          "Your email has been successfully verified!",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Color.fromARGB(255, 37, 100, 228),
+          colorText: Colors.white,
+        );
+
+        // Redirect the user to their respective homepage based on their role
+        Get.to(PatiantHomeScreen());
+        break;
+      }
+    }
+  } catch (e) {
+    Get.snackbar(
+      "Error",
+      "An error occurred while verifying the email: $e",
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
   }
+}
+
+
+    //Password Reset
+  Future<void> sendPasswordReset(String email) async {
+  try {
+    // Query Firestore to check if the email exists
+    var userQuery = await FirebaseFirestore.instance
+        .collection('Patiants') // Replace with your collection name
+        .where('email', isEqualTo: email)
+        .get();
+
+    if (userQuery.docs.isNotEmpty) {
+      // Email exists, send password reset email
+      await auth.sendPasswordResetEmail(email: email);
+      Get.snackbar("Success", "Password reset email sent to $email",
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Color.fromARGB(255, 37, 100, 228),
+      colorText: Colors.white);
+    } else {
+      // Email does not exist in Firestore
+      Get.snackbar("Error", "Email does not exist in our records.",
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Color.fromARGB(255, 37, 100, 228),
+      colorText: Colors.white);
+    }
+  } catch (e) {
+    // Handle other errors
+    Get.snackbar("Error Occurred", "$e",
+    snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Color.fromARGB(255, 37, 100, 228),
+      colorText: Colors.white);
+  }
+}
 }
