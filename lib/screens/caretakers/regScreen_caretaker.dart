@@ -130,8 +130,7 @@ class _RegscreenCaretakerState extends State<RegscreenCaretaker> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your email';
-                            } else if (!RegExp(
-                                    r'^[^@]+@[^@]+\.[^@]+$')
+                            } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$')
                                 .hasMatch(value)) {
                               return 'Please enter a valid email';
                             }

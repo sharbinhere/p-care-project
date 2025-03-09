@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 //import 'package:p_care/example.dart';
 import 'package:p_care/materials/radio_button.dart';
-import 'package:p_care/services/patiants/auth_controller.dart';
+import 'package:p_care/services/patients/auth_controller.dart';
 //import 'package:p_care/services/auth_service.dart';
 
 class RegScreenPatient extends StatefulWidget {

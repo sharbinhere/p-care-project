@@ -75,10 +75,9 @@ class CaretakeResetPassword extends StatelessWidget {
               ),
               child: GestureDetector(
                 onTap: () async {
-                    await _ctrl.sendPasswordReset(_email.text.trim());
-                    Get.to(loginScreenCaretaker(),
-                        transition: Transition.rightToLeft);
-                  
+                  await _ctrl.sendPasswordReset(_email.text.trim());
+                  Get.to(loginScreenCaretaker(),
+                      transition: Transition.rightToLeft);
                 },
                 child: Center(
                   child: Text(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:p_care/screens/patiants/regScreen_patients.dart';
-import 'package:p_care/services/patiants/auth_controller.dart';
-import 'package:p_care/services/patiants/patiant_reset_password.dart';
+import 'package:p_care/services/patients/auth_controller.dart';
+import 'package:p_care/services/patients/patient_reset_password.dart';
 //import 'package:p_care/screens/patiants/regScreen_patients.dart';
 
 class loginScreenPatient extends StatefulWidget {
@@ -173,7 +173,7 @@ class _loginScreenPatientState extends State<loginScreenPatient> {
                                 ),),
                                 TextButton(
                                   onPressed: (){
-                                    Get.to(RegScreenPatient(),
+                                    Get.to((),
                                     transition: Transition.fade,
                                     duration: Duration(seconds: 1));
                                   }, 

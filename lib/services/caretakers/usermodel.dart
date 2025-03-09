@@ -16,26 +16,30 @@ class CaretakerModel {
   });
 
   factory CaretakerModel.fromMap(DocumentSnapshot map) {
+    final data = map.data() as Map<String, dynamic>? ?? {};
     return CaretakerModel(
-      role: map["role"],
+      role: data["role"] as String?,
       id: map.id,
-      name: map["name"],
-      address: map["address"],
-      email: map["email"],
-      age: map["age"],
-      pass: map["pass"],
-      conf_pass: map["confirm pass"],
+      name: data["name"] as String?,
+      address: data["address"] as String?,
+      email: data["email"] as String?,
+      age: data["age"] as String?,
+      pass: data["pass"] as String?,
+      conf_pass: data["confirm pass"] as String?,
+      phone: data["phone"] as String?
         // Add role field
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
+      "id":id,
       "role": role, 
       "name": name,
       "address": address,
       "email": email,
       "age": age,
+      "phone":phone,
       "pass": pass,
       "confirm pass": conf_pass,
        // Add role field
