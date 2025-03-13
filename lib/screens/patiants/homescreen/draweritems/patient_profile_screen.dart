@@ -138,19 +138,19 @@ class PatientProfileScreenState extends State<PatientProfileScreen> {
         // Update local state
         setState(() {
           switch (fieldName) {
-            case 'Name':
+            case 'name':
               _name = newValue;
               break;
-            case 'Email':
+            case 'email':
               _email = newValue;
               break;
-            case 'Address':
+            case 'address':
               _address = newValue;
               break;
-            case 'Age':
+            case 'age':
               _age = newValue;
               break;
-            case 'Phone':
+            case 'phone':
               _phone = newValue;
               break;
             case 'About':

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:p_care/screens/additionalScreens/onboardScreen.dart';
+import 'package:p_care/screens/patiants/homescreen/draweritems/patient_profile_screen.dart';
 import 'package:p_care/screens/patiants/homescreen/patients_home_screen.dart';
 import 'package:p_care/services/patients/usermodel.dart';
 
@@ -46,8 +47,15 @@ class PatiantAuthController extends GetxController {
    //Add user details on firebase database
    Future<void> addUser() async {
   try {
+    String? uid = auth.currentUser?.uid; // Get UID of the authenticated user
+    if (uid == null) {
+      print("Error: User UID is null");
+      return;
+    }
+
     // Create a patient model
     PatiantUsermodel user = PatiantUsermodel(
+      id: uid, // Store UID inside the document
       role: 'patient',
       name: fullNameController.text,
       address: addressController.text,
@@ -57,17 +65,15 @@ class PatiantAuthController extends GetxController {
       diagnosis: diagnosisController.text,
     );
 
-    // Add the patient to the "Patiants" collection
-    await db
-        .collection("Patients")
-        .doc(auth.currentUser?.uid) // Use UID as the document ID
-        .set(user.toMap()); // Store all patient data in a single document
+    // Add the patient to Firestore using UID as document ID
+    await db.collection("Patients").doc(uid).set(user.toMap());
 
-    print("Patient added successfully!");
+    print("Patient added successfully with ID: $uid");
   } catch (e) {
     print("Error adding patient: $e");
   }
 }
+
    
    //Signout 
    signOut() async {
@@ -81,6 +87,7 @@ class PatiantAuthController extends GetxController {
     try{
       loading.value=true;
       await auth.signInWithEmailAndPassword(email: loginemail.text.trim(), password: loginpass.text.trim());
+      Get.put(PatientProfileScreen());
       Get.offAll(()=>PatientsHomeScreen(),
       transition: Transition.fade,
       duration: Duration(milliseconds: 650));

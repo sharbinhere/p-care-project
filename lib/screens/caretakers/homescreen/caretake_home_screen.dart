@@ -65,7 +65,7 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
       case 3:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PatientsNeedsScreen()),
+          MaterialPageRoute(builder: (context) => CaretakerNeedsScreen()),
         );
         break;
       default:
@@ -159,7 +159,7 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
                   title: const Text('Logout',
                       style: TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
                   onTap: () {
-                    _ctrl.signOut();
+                    showSignOutDialog();
                   },
                 ),
                 ListTile(
@@ -322,4 +322,22 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
       ),
     );
   }
+
+  void showSignOutDialog() {
+  Get.defaultDialog(
+    title: "Confirm Sign Out",
+    middleText: "Are you sure you want to sign out?",
+    textCancel: "Cancel",
+    textConfirm: "Confirm",
+    confirmTextColor: Colors.white,
+    buttonColor: Color.fromARGB(255, 37, 100, 228),
+    onConfirm: () {
+      Get.back(); // Close the dialog
+       _ctrl.signOut();// Call your sign-out function
+    },
+    onCancel: () {
+      Get.back(); // Just close the dialog
+    },
+  );
+}
 } 

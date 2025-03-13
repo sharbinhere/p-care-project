@@ -8,6 +8,8 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:p_care/screens/additionalScreens/onboardScreen.dart';
 import 'package:p_care/screens/caretakers/homescreen/caretake_home_screen.dart';
 import 'package:p_care/screens/caretakers/homescreen/draweritems/profile_screen.dart';
+import 'package:p_care/screens/caretakers/homescreen/patient_view_for_report.dart';
+import 'package:p_care/screens/caretakers/homescreen/patient_view_screen.dart';
 import 'package:p_care/screens/patiants/homescreen/draweritems/patient_profile_screen.dart';
 import 'package:p_care/screens/patiants/homescreen/patients_home_screen.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -22,6 +24,10 @@ void main() async {
   Get.put(CareTakerHomeScreen());
   Get.put(PatientsHomeScreen());
   Get.put(PatienceListController());
+  Get.put(CareTakerProfileScreen());
+  Get.put(PatientProfileScreen());
+  Get.put(PatientsScreen());
+  Get.put(PatientsViewScreen());
   
   
   runApp(const MyApp());

@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:p_care/screens/additionalScreens/onboardScreen.dart';
 import 'package:p_care/screens/caretakers/homescreen/caretake_home_screen.dart';
+import 'package:p_care/screens/caretakers/homescreen/draweritems/profile_screen.dart';
+import 'package:p_care/screens/caretakers/homescreen/patient_view_for_report.dart';
+import 'package:p_care/screens/caretakers/homescreen/patient_view_screen.dart';
 import 'package:p_care/services/caretakers/usermodel.dart';
 
 class CaretakerAuthController extends GetxController {
@@ -32,6 +35,10 @@ class CaretakerAuthController extends GetxController {
           password: passwordController.text.trim());
       await addUser();
       await verifyEmail();
+      Get.put(CareTakerHomeScreen());
+      Get.put(CareTakerProfileScreen());
+      Get.put(PatientsViewScreen());
+      Get.put(PatientsScreen());
     } catch (e) {
       Get.snackbar("Error occured", "$e",
           snackPosition: SnackPosition.BOTTOM,
@@ -85,7 +92,8 @@ class CaretakerAuthController extends GetxController {
           email: loginemail.text.trim(), password: loginpass.text.trim());
 
           //print("User: ${userCredential.user?.uid}.....................");
-
+      Get.put(CareTakerHomeScreen());
+      Get.put(CareTakerProfileScreen());
       Get.offAll(()=>CareTakerHomeScreen(),
           transition: Transition.fade, duration: Duration(milliseconds: 650));
       loading.value = false;

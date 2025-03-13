@@ -51,7 +51,21 @@ class _PatientsHomeScreenState extends State<PatientsHomeScreen> {
   ];
 
   // Method to handle tap on dashboard items
-  void handleTap(int id, BuildContext context) {
+  void handleTap(int id, BuildContext context)async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+    Get.snackbar("Error", "User not logged in", 
+    backgroundColor: Color.fromARGB(255, 37, 100, 228), 
+    colorText: Colors.white);
+    return;
+  }
+
+  DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('Patients') // Replace with your collection name
+        .doc(user.uid) // Use the user's UID as the document ID
+        .get();
+
     switch (id) {
       case 1:
         Navigator.push(
@@ -62,7 +76,7 @@ class _PatientsHomeScreenState extends State<PatientsHomeScreen> {
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => NeedScreen()),
+          MaterialPageRoute(builder: (context) => NeedsMentioningScreen(patientId: user.uid,patientName:userDoc['name'] ,)),
         );
         break;
       case 3:
@@ -162,7 +176,7 @@ class _PatientsHomeScreenState extends State<PatientsHomeScreen> {
                   title: const Text('Logout',
                       style: TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
                   onTap: () {
-                    _ctrl.signOut();
+                    showSignOutDialog();
                   },
                 ),
                 ListTile(
@@ -325,4 +339,23 @@ class _PatientsHomeScreenState extends State<PatientsHomeScreen> {
       ),
     );
   }
+  void showSignOutDialog() {
+  Get.defaultDialog(
+    title: "Confirm Sign Out",
+    middleText: "Are you sure you want to sign out?",
+    textCancel: "Cancel",
+    textConfirm: "Confirm",
+    confirmTextColor: Colors.white,
+    buttonColor: Color.fromARGB(255, 37, 100, 228),
+    onConfirm: () {
+      Get.back(); // Close the dialog
+       _ctrl.signOut();// Call your sign-out function
+    },
+    onCancel: () {
+      Get.back(); // Just close the dialog
+    },
+  );
+}
 } 
+
+

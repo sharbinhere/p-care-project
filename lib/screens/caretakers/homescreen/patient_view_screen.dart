@@ -9,92 +9,91 @@ class PatientsScreen extends StatelessWidget {
       Get.find<PatienceListController>();
 
   /// Function to delete a patient and related data
-  Future<void> deletePatient(String patientId, String email) async {
-    try {
-      // Show confirmation dialog
-      bool confirmDelete = await Get.dialog(
-        AlertDialog(
-          title: Text("Confirm Delete"),
-          content: Text("Are you sure you want to delete this patient? This action cannot be undone."),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false),
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () => Get.back(result: true),
-              child: Text("Delete", style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        ),
-      );
+  Future<void> deletePatient(String patientId) async {
+  try {
+    print("Deleting patient with ID: $patientId");
 
-      if (!confirmDelete) return;
+    //  Delete from Patients collection
+    await FirebaseFirestore.instance.collection("Patients").doc(patientId).delete();
 
-      // Delete patient from Firestore
-      await FirebaseFirestore.instance.collection("Patients").doc(patientId).delete();
+    //  Delete associated reports
+    QuerySnapshot reports = await FirebaseFirestore.instance
+        .collection("Reports")
+        .where("patientId", isEqualTo: patientId)
+        .get();
 
-      // Delete related reports
-      QuerySnapshot reports = await FirebaseFirestore.instance
-          .collection("Reports")
-          .where("patientId", isEqualTo: patientId)
-          .get();
-
-      for (var doc in reports.docs) {
-        await doc.reference.delete();
-      }
-
-      // Delete patient from Firebase Authentication
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await user.delete(); // Ensure Firebase rules allow this action
-      }
-
-      // Show success message
-      Get.snackbar("Success", "Patient deleted successfully", backgroundColor: Colors.green, colorText: Colors.white);
-    } catch (e) {
-      Get.snackbar("Error", "Failed to delete patient: $e", backgroundColor: Colors.red, colorText: Colors.white);
+    for (var doc in reports.docs) {
+      await doc.reference.delete();
     }
+
+    // Delete associated Needs
+    QuerySnapshot need = await FirebaseFirestore.instance
+        .collection("Needs")
+        .where("patientId", isEqualTo: patientId)
+        .get();
+
+    for (var doc in need.docs) {
+      await doc.reference.delete();
+    }   
+
+    Get.snackbar("Success", "Patient deleted successfully", backgroundColor: Colors.green, colorText: Colors.white);
+  } catch (e) {
+    Get.snackbar("Error", "Failed to delete patient: $e", backgroundColor: Colors.red, colorText: Colors.white);
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Patients List')),
-      body: Obx(() {
-        if (patienceListController.patients.isEmpty) {
-          return Center(child: Text('No patients found'));
-        }
+      body:  StreamBuilder<QuerySnapshot>(
+    stream: FirebaseFirestore.instance.collection("Patients").snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(child: CircularProgressIndicator()); // Show loading state
+      }
 
-        return ListView.builder(
-          itemCount: patienceListController.patients.length,
-          itemBuilder: (context, index) {
-            var patient = patienceListController.patients[index];
-            return Card(
-              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: ListTile(
-                title: Text(patient['name'] ?? 'No Name'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Age: ${patient['age'] ?? 'N/A'}"),
-                    Text("Address: ${patient['address'] ?? 'N/A'}"),
-                    Text("Phone: ${patient['phone'] ?? 'N/A'}"),
-                    Text("Diagnosis: ${patient['diagnosis'] ?? 'N/A'}"),
-                  ],
-                ),
-                trailing: IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  onPressed: () {
-                    print("Deleting patient: ${patient['id']} with email: ${patient['email']}");
-                    deletePatient(patient['id'], patient['email']);
-                  }
-                ),
+      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        return Center(child: Text('No patients found'));
+      }
+
+      return ListView.builder(
+        itemCount: snapshot.data!.docs.length,
+        itemBuilder: (context, index) {
+          var patientDoc = snapshot.data!.docs[index]; // Firestore DocumentSnapshot
+          var patientData = patientDoc.data() as Map<String, dynamic>; // Convert to Map
+          var patientId = patientDoc.id; // Get Firestore document ID
+
+          return Card(
+            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ListTile(
+              title: Text(patientData['name'] ?? 'No Name'),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Age: ${patientData['age'] ?? 'N/A'}"),
+                  Text("Address: ${patientData['address'] ?? 'N/A'}"),
+                  Text("Phone: ${patientData['phone'] ?? 'N/A'}"),
+                  Text("Diagnosis: ${patientData['diagnosis'] ?? 'N/A'}"),
+                ],
               ),
-            );
-          },
-        );
-      }),
+              trailing: IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () async {
+                  await deletePatient(patientId);
+                },
+              ),
+            ),
+          );
+        },
+      );
+    },
+  )
+
+
+
+
     );
   }
 }
