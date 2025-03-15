@@ -13,6 +13,7 @@ import 'package:p_care/screens/caretakers/homescreen/patient_view_screen.dart';
 import 'package:p_care/screens/patiants/homescreen/draweritems/patient_profile_screen.dart';
 import 'package:p_care/screens/patiants/homescreen/patients_home_screen.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:p_care/screens/patiants/homescreen/report_view_screen.dart';
 import 'package:p_care/services/caretakers/profileimage_controller.dart';
 import 'package:p_care/services/patients/patient_list_controller.dart';
 //import 'package:p_care/services/patients/p_profileimage_controller.dart';
@@ -28,8 +29,8 @@ void main() async {
   Get.put(PatientProfileScreen());
   Get.put(PatientsScreen());
   Get.put(PatientsViewScreen());
-  
-  
+  Get.put(ReportViewScreen);
+
   runApp(const MyApp());
 }
 
@@ -47,11 +48,19 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     initialization();
+    Get.put(CareTakerHomeScreen());
+    Get.put(PatientsHomeScreen());
+    Get.put(PatienceListController());
+    Get.put(CareTakerProfileScreen());
+    Get.put(PatientProfileScreen());
+    Get.put(PatientsScreen());
+    Get.put(PatientsViewScreen());
     _initialScreen = _getInitialScreen();
   }
 
   // Determines the initial screen based on user authentication and role
   Future<Widget> _getInitialScreen() async {
+    
     // Simulate a delay (optional)
     await Future.delayed(const Duration(seconds: 1));
 

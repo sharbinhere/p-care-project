@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:p_care/screens/additionalScreens/onboardScreen.dart';
+import 'package:p_care/screens/additionalScreens/otpscreen.dart';
 import 'package:p_care/screens/caretakers/homescreen/caretake_home_screen.dart';
 import 'package:p_care/screens/caretakers/homescreen/draweritems/profile_screen.dart';
 import 'package:p_care/screens/caretakers/homescreen/patient_view_for_report.dart';
@@ -21,8 +22,10 @@ class CaretakerAuthController extends GetxController {
   TextEditingController confirmPasswordController = TextEditingController();
   TextEditingController loginemail = TextEditingController();
   TextEditingController loginpass = TextEditingController();
+  TextEditingController otpController = TextEditingController();
 
   final loading = false.obs;
+  RxString verificationId = ''.obs;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   
 
@@ -139,7 +142,7 @@ class CaretakerAuthController extends GetxController {
           );
 
           // Redirect the user to their respective homepage based on their role
-          Get.offAll(()=>CareTakerHomeScreen());
+          Get.to(CareTakerHomeScreen());
           break;
         }
       }
@@ -187,4 +190,62 @@ class CaretakerAuthController extends GetxController {
     snackPosition: SnackPosition.BOTTOM);
   }
 }
+
+//send otp
+Future<void> sendOTP() async {
+  try {
+    loading.value = true;
+    await auth.verifyPhoneNumber(
+      phoneNumber: phoneController.text.trim(),
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        // Auto-signs in for some numbers
+        UserCredential userCredential = await auth.signInWithCredential(credential);
+        Get.offAll(() => CareTakerHomeScreen()); // Navigate after auto-login
+      },
+      verificationFailed: (FirebaseAuthException e) {
+        Get.snackbar("Error", e.message ?? "Failed to verify phone number");
+        loading.value = false;
+      },
+      codeSent: (String verId, int? resendToken) {
+        verificationId.value = verId;
+        Get.snackbar("OTP Sent", "Enter the OTP sent to your phone");
+      },
+      codeAutoRetrievalTimeout: (String verId) {
+        verificationId.value = verId;
+      },
+    );
+  } catch (e) {
+    Get.snackbar("Error", e.toString());
+  } finally {
+    loading.value = false;
+  }
+}
+
+//verifyotp
+Future<void> verifyOTP() async {
+  try {
+    loading.value = true;
+    PhoneAuthCredential credential = PhoneAuthProvider.credential(
+      verificationId: verificationId.value,
+      smsCode: otpController.text.trim(),
+    );
+
+    UserCredential userCredential = await auth.signInWithCredential(credential);
+
+    // Check if it's a new user (optional, but useful)
+    bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
+    if (isNewUser) {
+      await addUser(); // Save user details if it's a new user
+    }
+
+    Get.offAll(() => CareTakerHomeScreen()); // Navigate to home screen
+  } catch (e) {
+    Get.snackbar("Error", "Invalid OTP. Try again.");
+  } finally {
+    loading.value = false;
+  }
+}
+
+
+
 }

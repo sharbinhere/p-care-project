@@ -7,6 +7,7 @@ import 'package:p_care/screens/caretakers/homescreen/draweritems/feedback_screen
 import 'package:p_care/screens/caretakers/homescreen/draweritems/profile_screen.dart';
 import 'package:p_care/screens/caretakers/homescreen/patiant_needs_screen.dart';
 import 'package:p_care/screens/caretakers/homescreen/patient_view_screen.dart';
+import 'package:p_care/screens/patiants/homescreen/caretaker_list.dart';
 import 'package:p_care/screens/patiants/homescreen/draweritems/patient_profile_screen.dart';
 import 'package:p_care/screens/patiants/homescreen/feedback_screen.dart';
 import 'package:p_care/screens/patiants/homescreen/need_screen.dart';
@@ -82,7 +83,7 @@ class _PatientsHomeScreenState extends State<PatientsHomeScreen> {
       case 3:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PatienceFeedbackScreen()),
+          MaterialPageRoute(builder: (context) => CaretakerListScreen()),
         );
         break;
       default:
@@ -259,7 +260,7 @@ class _PatientsHomeScreenState extends State<PatientsHomeScreen> {
                       },
                     ),
                     subtitle: const Text(
-                      'Manage your patients efficiently',
+                      'We are here to take care of you',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,

@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:p_care/screens/caretakers/homescreen/draweritems/about_screen.dart';
 import 'package:p_care/screens/caretakers/homescreen/draweritems/feedback_screen.dart';
 import 'package:p_care/screens/caretakers/homescreen/draweritems/profile_screen.dart';
+import 'package:p_care/screens/caretakers/homescreen/feedback_view_screen.dart';
 import 'package:p_care/screens/caretakers/homescreen/patiant_needs_screen.dart';
 import 'package:p_care/screens/caretakers/homescreen/patient_view_for_report.dart';
 import 'package:p_care/screens/caretakers/homescreen/patient_view_screen.dart';
@@ -45,10 +46,20 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
       "icon": Icons.chat,
       "background_color": Colors.purple,
     },
+    {
+      "id":4,
+      "title": "Feedback view",
+      "icon" : Icons.book,
+      "background_color": Colors.blue, 
+    },
   ];
 
   // Method to handle tap on dashboard items
   void handleTap(int id, BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
+    if(user == null){
+      return;
+    }
     switch (id) {
       case 1:
         Navigator.push(
@@ -68,6 +79,11 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
           MaterialPageRoute(builder: (context) => CaretakerNeedsScreen()),
         );
         break;
+      case 4:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => CareTakerFeedbackViewScreen(caretakerId: user.uid,)),
+          );
       default:
     }
   }

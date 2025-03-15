@@ -52,74 +52,77 @@ class _PatientReportScreenState extends State<PatientReportScreen> {
 
   /// Submit or update the report
   Future<void> submitReport() async {
-    if (reportController.text.isEmpty) {
-      Get.snackbar("Error", "Report cannot be empty");
+  if (reportController.text.isEmpty) {
+    Get.snackbar("Error", "Report cannot be empty");
+    return;
+  }
+
+  setState(() {
+    isLoading = true;
+  });
+
+  try {
+    String? caretakerId = FirebaseAuth.instance.currentUser?.uid;
+    if (caretakerId == null) {
+      Get.snackbar("Error", "Caretaker not logged in");
       return;
     }
 
-    setState(() {
-      isLoading = true;
-    });
+    DocumentSnapshot caretakerSnapshot = await FirebaseFirestore.instance
+        .collection("CareTakers")
+        .doc(caretakerId)
+        .get();
 
-    try {
-      String? caretakerId = FirebaseAuth.instance.currentUser?.uid;
-      if (caretakerId == null) {
-        Get.snackbar("Error", "Caretaker not logged in");
-        return;
-      }
+    String caretakerName = caretakerSnapshot.exists
+        ? caretakerSnapshot["name"]
+        : "Unknown Caretaker";
 
-      DocumentSnapshot caretakerSnapshot = await FirebaseFirestore.instance
-          .collection("CareTakers")
-          .doc(caretakerId)
-          .get();
+    // ✅ New Report Entry (Create a Map First)
+    Map<String, dynamic> newReportEntry = {
+      "text": reportController.text,
+      "timestamp": Timestamp.now(), // 🔥 Use `Timestamp.now()` instead of `FieldValue.serverTimestamp()`
+    };
 
-      String caretakerName = caretakerSnapshot.exists
-          ? caretakerSnapshot["name"]
-          : "Unknown Caretaker";
-
-      if (reportId != null) {
-        // Update existing report
-        await FirebaseFirestore.instance
-            .collection("Reports")
-            .doc(reportId)
-            .update({
-          "report": reportController.text,
-          "timestamp": FieldValue.serverTimestamp(),
-        });
-
-        Get.snackbar("Success", "Report updated successfully");
-      } else {
-        // Create new report
-        DocumentReference newReport = await FirebaseFirestore.instance
-            .collection("Reports")
-            .add({
-          "patientId": widget.patientId,
-          "patientName": widget.patientName,
-          "caretakerId": caretakerId,
-          "caretakerName": caretakerName,
-          "report": reportController.text,
-          "timestamp": FieldValue.serverTimestamp(),
-        });
-
-        setState(() {
-          reportId = newReport.id; // Store new report ID for future edits
-        });
-
-        Get.snackbar("Success", "Report submitted successfully");
-      }
-
-      setState(() {
-        isEditing = false; // Switch to read-only mode after submission
+    if (reportId != null) {
+      // ✅ Append the new report to the existing list
+      await FirebaseFirestore.instance.collection("Reports").doc(reportId).update({
+        "reports": FieldValue.arrayUnion([newReportEntry]), // 🔥 Add new report to array
+        "lastUpdated": FieldValue.serverTimestamp(), // ✅ This can use `serverTimestamp()`
       });
 
-    } catch (e) {
-      Get.snackbar("Error", "Failed to submit report");
+      Get.snackbar("Success", "Report updated successfully");
+    } else {
+      // ✅ Create a new document with the first report
+      DocumentReference newReport = await FirebaseFirestore.instance.collection("Reports").add({
+        "patientId": widget.patientId,
+        "patientName": widget.patientName,
+        "caretakerId": caretakerId,
+        "caretakerName": caretakerName,
+        "reports": [newReportEntry], // 🔥 Add report inside an array
+        "lastUpdated": FieldValue.serverTimestamp(), // ✅ Track last update
+      });
+
+      setState(() {
+        reportId = newReport.id; // Store new report ID for future edits
+      });
+
+      Get.snackbar("Success", "Report submitted successfully");
     }
 
     setState(() {
-      isLoading = false;
+      isEditing = false; // Switch to read-only mode after submission
     });
+
+  } catch (e) {
+    Get.snackbar("Error", "Failed to submit report: $e");
   }
+
+  setState(() {
+    isLoading = false;
+  });
+}
+
+
 
   @override
   Widget build(BuildContext context) {
