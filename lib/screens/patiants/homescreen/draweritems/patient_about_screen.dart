@@ -44,7 +44,7 @@ class PatientAboutScreen extends StatelessWidget {
             SizedBox(height: 10),
             Text(
               "P-CARE is dedicated to providing seamless and efficient "
-              "care services for patients and caretakers. Our goal is to "
+              "care services for yoy. Our goal is to "
               "connect individuals in need of assistance with qualified "
               "caregivers through a secure and user-friendly platform.",
               style: TextStyle(fontSize: 18, height: 1.5),

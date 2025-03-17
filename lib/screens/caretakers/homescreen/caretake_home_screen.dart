@@ -25,6 +25,7 @@ class CareTakerHomeScreen extends StatefulWidget {
 class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
   final _ctrl = Get.put(CaretakerAuthController());
   final ProfileController profileController = Get.put(ProfileController());
+  int newNeedsCount = 0;
 
   // List of dashboard items
   final List dashboardData = const [
@@ -47,17 +48,33 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
       "background_color": Colors.purple,
     },
     {
-      "id":4,
+      "id": 4,
       "title": "Feedback view",
-      "icon" : Icons.book,
-      "background_color": Colors.blue, 
+      "icon": Icons.book,
+      "background_color": Colors.blue,
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    Get.put(CareTakerProfileScreen());
+    _listenForNewNeeds();
+  }
+
+  void _listenForNewNeeds() {
+    FirebaseFirestore.instance.collection('Needs').snapshots().listen((snapshot) {
+      int count = snapshot.docs.length;
+      setState(() {
+        newNeedsCount = count; // ✅ Update count
+      });
+    });
+  }
 
   // Method to handle tap on dashboard items
   void handleTap(int id, BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
-    if(user == null){
+    if (user == null) {
       return;
     }
     switch (id) {
@@ -74,6 +91,11 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
         );
         break;
       case 3:
+
+        // ✅ Hide the red dot when "Patients Needs" is opened
+        setState(() {
+        newNeedsCount = -1; // Use -1 to indicate no badge
+       });
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => CaretakerNeedsScreen()),
@@ -82,8 +104,11 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
       case 4:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CareTakerFeedbackViewScreen(caretakerId: user.uid,)),
-          );
+          MaterialPageRoute(
+              builder: (context) => CareTakerFeedbackViewScreen(
+                    caretakerId: user.uid,
+                  )),
+        );
       default:
     }
   }
@@ -102,7 +127,8 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
 
     // Return the user's name and email
     return {
-      'name': userDoc['name'], // Replace 'name' with the field name in Firestore
+      'name':
+          userDoc['name'], // Replace 'name' with the field name in Firestore
       'email': user.email, // Get email from Firebase Auth
     };
   }
@@ -116,8 +142,7 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
         centerTitle: true,
         title: const Text(
           'P-CARE',
-          style: TextStyle(color: Colors.white,
-          fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
       drawer: Drawer(
@@ -143,19 +168,27 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
                   ),
                   accountName: Text(name),
                   accountEmail: Text(email),
-                  currentAccountPicture: Obx(
-                    ()=> CircleAvatar(
-                    backgroundImage: profileController.profileImage.value.isNotEmpty
-                        ? MemoryImage(base64Decode(profileController.profileImage.value))
-                        : const AssetImage('assets/default-avatar.png') as ImageProvider,
-                                    ),
-                  )
+                  currentAccountPicture: Obx(() {
+                    String currentUserId =
+                        FirebaseAuth.instance.currentUser?.uid ?? "";
+                    String base64Image =
+                        profileController.getProfileImage(currentUserId);
+
+                    return CircleAvatar(
+                      radius: 50,
+                      backgroundImage: base64Image.isNotEmpty
+                          ? MemoryImage(base64Decode(base64Image))
+                          : AssetImage('assets/default-avatar.png')
+                              as ImageProvider,
+                    );
+                  }),
                 ),
                 ListTile(
                   leading: const Icon(Icons.home,
                       color: Color.fromARGB(255, 37, 100, 228)),
                   title: const Text('Home',
-                      style: TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
+                      style:
+                          TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
                   onTap: () {
                     Navigator.pop(context); // Close the drawer
                   },
@@ -164,7 +197,8 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
                   leading: const Icon(Icons.account_circle,
                       color: Color.fromARGB(255, 37, 100, 228)),
                   title: const Text('Profile',
-                      style: TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
+                      style:
+                          TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
                   onTap: () {
                     Get.to(CareTakerProfileScreen()); // Close the drawer
                   },
@@ -173,27 +207,30 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
                   leading: const Icon(Icons.logout,
                       color: Color.fromARGB(255, 37, 100, 228)),
                   title: const Text('Logout',
-                      style: TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
+                      style:
+                          TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
                   onTap: () {
                     showSignOutDialog();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.notification_add,
+                      color: Color.fromARGB(255, 37, 100, 228)),
+                  title: const Text('Notification',
+                      style:
+                          TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
+                  onTap: () {
+                    Get.to(AboutUsScreen()); // Close the drawer
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.help,
                       color: Color.fromARGB(255, 37, 100, 228)),
                   title: const Text('About us',
-                      style: TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
+                      style:
+                          TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
                   onTap: () {
                     Get.to(AboutUsScreen()); // Close the drawer
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.feedback,
-                      color: Color.fromARGB(255, 37, 100, 228)),
-                  title: const Text('Feedback',
-                      style: TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
-                  onTap: () {
-                    Get.to(FeedbackScreen()); // Close the drawer
                   },
                 ),
               ],
@@ -218,7 +255,8 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
                     title: FutureBuilder<Map<String, String?>>(
                       future: getCurrentUserDetails(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const Text(
                             'Welcome',
                             style: TextStyle(
@@ -265,95 +303,135 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    trailing: Obx(
-                      ()=> CircleAvatar(
-                                        backgroundImage: profileController.profileImage.value.isNotEmpty
-                        ? MemoryImage(base64Decode(profileController.profileImage.value))
-                        : const AssetImage('assets/default-avatar.png') as ImageProvider,
-                                      ),
-                    ))
+                    trailing: Obx(() {
+                      String currentUserId =
+                          FirebaseAuth.instance.currentUser?.uid ?? "";
+                      String base64Image =
+                          profileController.getProfileImage(currentUserId);
+
+                      return CircleAvatar(
+                        radius: 50,
+                        backgroundImage: base64Image.isNotEmpty
+                            ? MemoryImage(base64Decode(base64Image))
+                            : AssetImage('assets/default-avatar.png')
+                                as ImageProvider,
+                      );
+                    }),
+                  )
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 35),
+          const SizedBox(height: 25),
           ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: dashboardData.length,
-            itemBuilder: (context, index) {
-              final data = dashboardData[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                child: InkWell(
-                  onTap: () {
-                    handleTap(data['id'], context);
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 25),
+  shrinkWrap: true,
+  physics: const NeverScrollableScrollPhysics(),
+  itemCount: dashboardData.length,
+  itemBuilder: (context, index) {
+    final data = dashboardData[index];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+      child: Stack(
+        children: [
+          InkWell(
+            onTap: () {
+              handleTap(data['id'], context);
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 25),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    offset: const Offset(0, 5),
+                    color: Theme.of(context).primaryColor.withOpacity(.2),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(left: 20),
+                    padding: const EdgeInsets.all(15),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          offset: const Offset(0, 5),
-                          color: Theme.of(context).primaryColor.withOpacity(.2),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                        ),
-                      ],
+                      color: data['background_color'],
+                      shape: BoxShape.circle,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(left: 20),
-                          padding: const EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: data['background_color'],
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            data['icon'],
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        Text(
-                          data['title'],
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    child: Icon(
+                      data['icon'],
+                      color: Colors.white,
                     ),
                   ),
-                ),
-              );
-            },
+                  const SizedBox(width: 20),
+                  Text(
+                    data['title'],
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
+          // ✅ Show the red notification badge only for "Patients Needs"
+          if (data['id'] == 3 && newNeedsCount > 0)
+            Positioned(
+              right: 15,
+              top: 10,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 20,
+                  minHeight: 20,
+                ),
+                child: Text(
+                  '$newNeedsCount',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  },
+)
+,
         ],
       ),
     );
   }
 
   void showSignOutDialog() {
-  Get.defaultDialog(
-    title: "Confirm Sign Out",
-    middleText: "Are you sure you want to sign out?",
-    textCancel: "Cancel",
-    textConfirm: "Confirm",
-    confirmTextColor: Colors.white,
-    buttonColor: Color.fromARGB(255, 37, 100, 228),
-    onConfirm: () {
-      Get.back(); // Close the dialog
-       _ctrl.signOut();// Call your sign-out function
-    },
-    onCancel: () {
-      Get.back(); // Just close the dialog
-    },
-  );
+    Get.defaultDialog(
+      title: "Confirm Sign Out",
+      middleText: "Are you sure you want to sign out?",
+      textCancel: "Cancel",
+      textConfirm: "Confirm",
+      confirmTextColor: Colors.white,
+      buttonColor: Color.fromARGB(255, 37, 100, 228),
+      onConfirm: () {
+        Get.back(); // Close the dialog
+        _ctrl.signOut(); // Call your sign-out function
+      },
+      onCancel: () {
+        Get.back(); // Just close the dialog
+      },
+    );
+  }
 }
-} 

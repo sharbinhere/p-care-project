@@ -26,12 +26,14 @@ class CareTakerProfileScreenState extends State<CareTakerProfileScreen> {
   String _address = 'Loading...';
   String _age = 'Loading...';
   String _phone = 'Loading...';
-  String _about = 'Type something about you...';
 
   @override
   void initState() {
     super.initState();
-    _fetchUserDetails();
+
+    Future.delayed(Duration.zero, () {
+      _fetchUserDetails();
+    });
   }
 
   String? _imageBase64; // Store Base64 string
@@ -57,11 +59,12 @@ class CareTakerProfileScreenState extends State<CareTakerProfileScreen> {
         _address = userDoc['address'] ?? 'Not provided';
         _age = userDoc['age'] ?? 'Not provided';
         _phone = userDoc['phone'] ?? 'Not provided';
-        _about = userDoc['about'] ?? 'Not provided';
+
         _imageBase64 = userDoc['profileImage'] ?? null; //Fetch Base64 image
       });
       if (userDoc['profileImage'] != null) {
-        _profileController.updateProfileImage(userDoc['profileImage']);
+        _profileController.getProfileImage(
+            user.uid,);
       }
     }
   }
@@ -69,35 +72,35 @@ class CareTakerProfileScreenState extends State<CareTakerProfileScreen> {
   // Pick image from gallery
 
   Future<void> _pickImage() async {
-  final XFile? pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-  if (pickedFile != null) {
-    File imageFile = File(pickedFile.path);
+    final XFile? pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
 
-    // Compress image before uploading (optional)
-    Uint8List? compressedBytes = await FlutterImageCompress.compressWithFile(
-      imageFile.absolute.path,
-      minWidth: 500,
-      minHeight: 500,
-      quality: 50,
-    );
+      // Compress image before uploading (optional)
+      Uint8List? compressedBytes = await FlutterImageCompress.compressWithFile(
+        imageFile.absolute.path,
+        minWidth: 500,
+        minHeight: 500,
+        quality: 50,
+      );
 
-    if (compressedBytes != null) {
-      String base64String = base64Encode(compressedBytes);
+      if (compressedBytes != null) {
+        String base64String = base64Encode(compressedBytes);
 
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('CareTakers')
-            .doc(user.uid)
-            .update({'profileImage': base64String});
+        User? user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await FirebaseFirestore.instance
+              .collection('CareTakers')
+              .doc(user.uid)
+              .update({'profileImage': base64String});
 
-        // ✅ Notify HomeScreen to update instantly
-        Get.find<ProfileController>().updateProfileImage(base64String);
+          // ✅ Notify HomeScreen to update instantly
+          Get.find<ProfileController>().updateProfileImage(base64String);
+        }
       }
     }
   }
-}
-
 
   // Edit a field and update Firestore
   void _editField(String fieldName, String currentValue) async {
@@ -153,9 +156,6 @@ class CareTakerProfileScreenState extends State<CareTakerProfileScreen> {
             case 'Phone':
               _phone = newValue;
               break;
-            case 'About':
-              _about = newValue;
-              break;
           }
         });
       }
@@ -184,16 +184,20 @@ class CareTakerProfileScreenState extends State<CareTakerProfileScreen> {
               Stack(
                 alignment: Alignment.bottomRight,
                 children: [
-                  Obx(() => CircleAvatar(
-                        radius: 50,
-                        backgroundImage: _image != null
-                            ? FileImage(_image!)
-                            : _profileController.profileImage.value.isNotEmpty
-                                ? MemoryImage(base64Decode(
-                                    _profileController.profileImage.value))
-                                : AssetImage('assets/default-avatar.png')
-                                    as ImageProvider,
-                      )),
+                  Obx(() {
+                    String currentUserId =
+                        FirebaseAuth.instance.currentUser?.uid ?? "";
+                    String base64Image =
+                        _profileController.getProfileImage(currentUserId);
+
+                    return CircleAvatar(
+                      radius: 50,
+                      backgroundImage: base64Image.isNotEmpty
+                          ? MemoryImage(base64Decode(base64Image))
+                          : AssetImage('assets/default-avatar.png')
+                              as ImageProvider,
+                    );
+                  }),
                   Positioned(
                     bottom: 0,
                     right: 0,
@@ -232,11 +236,10 @@ class CareTakerProfileScreenState extends State<CareTakerProfileScreen> {
               _buildEditableField('Address', _address, 'Address'),
               _buildEditableField('Age', _age, 'Age'),
               _buildEditableField('Phone', _phone, 'Phone'),
-              _buildEditableField('About', _about, 'About'),
             ],
           ),
         ),
       ),
     );
   }
-} 
+}

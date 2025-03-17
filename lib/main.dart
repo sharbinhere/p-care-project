@@ -145,10 +145,10 @@ class _MyAppState extends State<MyApp> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error, color: Colors.red, size: 50),
+                    Icon(Icons.signal_wifi_connected_no_internet_4, color: Colors.red, size: 50),
                     const SizedBox(height: 10),
                     Text(
-                      "Error: ${snapshot.error.toString()}",
+                      "Internet connection problem",
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.red, fontSize: 16),
                     ),

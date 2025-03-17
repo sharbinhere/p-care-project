@@ -3,11 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:p_care/screens/additionalScreens/onboardScreen.dart';
-import 'package:p_care/screens/additionalScreens/otpscreen.dart';
 import 'package:p_care/screens/caretakers/homescreen/caretake_home_screen.dart';
 import 'package:p_care/screens/caretakers/homescreen/draweritems/profile_screen.dart';
 import 'package:p_care/screens/caretakers/homescreen/patient_view_for_report.dart';
 import 'package:p_care/screens/caretakers/homescreen/patient_view_screen.dart';
+import 'package:p_care/services/caretakers/profileimage_controller.dart';
 import 'package:p_care/services/caretakers/usermodel.dart';
 
 class CaretakerAuthController extends GetxController {
@@ -28,11 +28,28 @@ class CaretakerAuthController extends GetxController {
   RxString verificationId = ''.obs;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   
+  
 
   //Account Creation.
   signUp() async {
     try {
       loading.value = true;
+
+      // Check if phone number already exists in Patients or CareTakers collection
+    bool phoneExists = await checkPhoneNumberExists(phoneController.text.trim());
+
+    if (phoneExists) {
+      Get.snackbar(
+        "Error",
+        "This phone number is already registered.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      loading.value = false;
+      return; // Stop the signup process
+    }
+
       await auth.createUserWithEmailAndPassword(
           email: emailController.text.trim(),
           password: passwordController.text.trim());
@@ -97,6 +114,8 @@ class CaretakerAuthController extends GetxController {
           //print("User: ${userCredential.user?.uid}.....................");
       Get.put(CareTakerHomeScreen());
       Get.put(CareTakerProfileScreen());
+      Get.put(ProfileController());
+
       Get.offAll(()=>CareTakerHomeScreen(),
           transition: Transition.fade, duration: Duration(milliseconds: 650));
       loading.value = false;
@@ -191,60 +210,32 @@ class CaretakerAuthController extends GetxController {
   }
 }
 
-//send otp
-Future<void> sendOTP() async {
+
+//Check phone number already exists
+Future<bool> checkPhoneNumberExists(String phoneNumber) async {
   try {
-    loading.value = true;
-    await auth.verifyPhoneNumber(
-      phoneNumber: phoneController.text.trim(),
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        // Auto-signs in for some numbers
-        UserCredential userCredential = await auth.signInWithCredential(credential);
-        Get.offAll(() => CareTakerHomeScreen()); // Navigate after auto-login
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        Get.snackbar("Error", e.message ?? "Failed to verify phone number");
-        loading.value = false;
-      },
-      codeSent: (String verId, int? resendToken) {
-        verificationId.value = verId;
-        Get.snackbar("OTP Sent", "Enter the OTP sent to your phone");
-      },
-      codeAutoRetrievalTimeout: (String verId) {
-        verificationId.value = verId;
-      },
-    );
-  } catch (e) {
-    Get.snackbar("Error", e.toString());
-  } finally {
-    loading.value = false;
-  }
-}
+    // Query CareTakers collection
+    final caretakerQuery = await db
+        .collection('CareTakers')
+        .where('phone', isEqualTo: phoneNumber)
+        .get();
 
-//verifyotp
-Future<void> verifyOTP() async {
-  try {
-    loading.value = true;
-    PhoneAuthCredential credential = PhoneAuthProvider.credential(
-      verificationId: verificationId.value,
-      smsCode: otpController.text.trim(),
-    );
+    // Query Patients collection
+    final patientQuery = await db
+        .collection('Patients')
+        .where('phone', isEqualTo: phoneNumber)
+        .get();
 
-    UserCredential userCredential = await auth.signInWithCredential(credential);
-
-    // Check if it's a new user (optional, but useful)
-    bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
-    if (isNewUser) {
-      await addUser(); // Save user details if it's a new user
+    // If phone exists in either collection, return true
+    if (caretakerQuery.docs.isNotEmpty || patientQuery.docs.isNotEmpty) {
+      return true;
     }
-
-    Get.offAll(() => CareTakerHomeScreen()); // Navigate to home screen
   } catch (e) {
-    Get.snackbar("Error", "Invalid OTP. Try again.");
-  } finally {
-    loading.value = false;
+    print("Error checking phone number: $e");
   }
+  return false;
 }
+
 
 
 

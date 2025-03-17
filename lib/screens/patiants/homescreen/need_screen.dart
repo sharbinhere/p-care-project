@@ -59,29 +59,59 @@ class _NeedsMentioningScreenState extends State<NeedsMentioningScreen> {
   }
 
   void submitNeeds() async {
-    if (selectedNeeds.isEmpty) return;
+  if (selectedNeeds.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Please select at least one need!")),
+    );
+    return;
+  }
 
-    List<Map<String, dynamic>> needsList = selectedNeeds.entries
-        .map((e) => {"name": e.key, "items.no": e.value})
-        .toList();
+  List<Map<String, dynamic>> needsList = selectedNeeds.entries
+      .map((e) => {
+            "name": e.key,
+            "quantity": e.value,
+          })
+      .toList();
 
-    DocumentReference docRef = needsRef.doc(widget.patientId);
+  DocumentReference docRef = needsRef.doc(widget.patientId);
+
+  try {
     DocumentSnapshot doc = await docRef.get();
 
+    DateTime now = DateTime.now(); // ✅ Get the current date and time
+
     if (doc.exists) {
-      await docRef.update({"needs": needsList});
+      await docRef.update({
+        "needs": FieldValue.arrayUnion(needsList), // ✅ Append new needs
+        "updatedAt": now.toIso8601String(), // ✅ Store current date-time as a string
+      });
     } else {
       await docRef.set({
         "patientId": widget.patientId,
         "patientName": widget.patientName,
         "needs": needsList,
+        "createdAt": now.toIso8601String(), // ✅ Store current date-time
       });
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Needs submitted successfully!")),
     );
+
+    setState(() {
+      selectedNeeds.clear(); // ✅ Clear the selection after submitting
+    });
+
+  } catch (e) {
+    print("🔥 Error submitting needs: $e"); // ✅ Debug error
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error: $e")), // ✅ Show error message
+    );
   }
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:p_care/screens/additionalScreens/onboardScreen.dart';
+import 'package:p_care/screens/patiants/homescreen/caretaker_list.dart';
 import 'package:p_care/screens/patiants/homescreen/draweritems/patient_profile_screen.dart';
 import 'package:p_care/screens/patiants/homescreen/patients_home_screen.dart';
 import 'package:p_care/services/patients/usermodel.dart';
@@ -32,6 +33,9 @@ class PatiantAuthController extends GetxController {
     await auth.createUserWithEmailAndPassword(email: emailController.text.trim(), password: passwordController.text.trim());
     await addUser();
     verifyEmail();
+    Get.put(PatientProfileScreen());
+    Get.put(PatientsHomeScreen());
+    Get.put(CaretakerListScreen());
     
     }
     catch(e){
@@ -88,6 +92,8 @@ class PatiantAuthController extends GetxController {
       loading.value=true;
       await auth.signInWithEmailAndPassword(email: loginemail.text.trim(), password: loginpass.text.trim());
       Get.put(PatientProfileScreen());
+      Get.put(PatientsHomeScreen());
+      Get.put(CaretakerListScreen());
       Get.offAll(()=>PatientsHomeScreen(),
       transition: Transition.fade,
       duration: Duration(milliseconds: 650));

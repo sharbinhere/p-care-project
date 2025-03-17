@@ -12,6 +12,7 @@ class CaretakerModel {
     this.age,
     this.pass,
     this.conf_pass,
+    
       // Add role field
   });
 
@@ -26,7 +27,8 @@ class CaretakerModel {
       age: data["age"] as String?,
       pass: data["pass"] as String?,
       conf_pass: data["confirm pass"] as String?,
-      phone: data["phone"] as String?
+      phone: data["phone"] as String?,
+      
         // Add role field
     );
   }

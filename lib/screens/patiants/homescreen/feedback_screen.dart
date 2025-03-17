@@ -17,7 +17,9 @@ class PatienceFeedbackScreen extends StatefulWidget {
 class _PatienceFeedbackScreenState extends State<PatienceFeedbackScreen> {
   final TextEditingController feedbackController = TextEditingController();
   bool isLoading = false;
-  
+  bool isEditing = false;
+  String? previousFeedback;
+  String? previousTimestamp;
 
   @override
   void initState() {
@@ -29,7 +31,6 @@ class _PatienceFeedbackScreenState extends State<PatienceFeedbackScreen> {
     String? patientId = FirebaseAuth.instance.currentUser?.uid;
     if (patientId == null) return;
 
-    
     try {
       DocumentSnapshot feedbackSnapshot = await FirebaseFirestore.instance
           .collection("Feedback")
@@ -38,8 +39,15 @@ class _PatienceFeedbackScreenState extends State<PatienceFeedbackScreen> {
 
       if (feedbackSnapshot.exists) {
         List feedbackList = feedbackSnapshot["feedbackList"] ?? [];
-        if (feedbackList.isNotEmpty) {
-          feedbackController.text = feedbackList.last["content"] ?? "";
+        for (var feedback in feedbackList.reversed) {
+          if (feedback["patientId"] == patientId) {
+            setState(() {
+              previousFeedback = feedback["content"];
+              previousTimestamp = feedback["timestamp"];
+              feedbackController.text = previousFeedback ?? ""; // Load previous feedback into text field
+            });
+            break;
+          }
         }
       }
     } catch (e) {
@@ -48,7 +56,6 @@ class _PatienceFeedbackScreenState extends State<PatienceFeedbackScreen> {
   }
 
   Future<void> submitFeedback() async {
-    String formattedTimestamp = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
     if (feedbackController.text.isEmpty) {
       Get.snackbar("Error", "Feedback cannot be empty");
       return;
@@ -58,16 +65,17 @@ class _PatienceFeedbackScreenState extends State<PatienceFeedbackScreen> {
 
     try {
       String? patientId = FirebaseAuth.instance.currentUser?.uid;
-      String? patientName = FirebaseAuth.instance.currentUser?.displayName;
-      if (patientId == null || patientName == null) {
+      if (patientId == null) {
         Get.snackbar("Error", "User not logged in");
         return;
       }
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('Patients') // Replace with your collection name
-        .doc(patientId) // Use the user's UID as the document ID
-        .get();
 
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('Patients')
+          .doc(patientId)
+          .get();
+
+      String formattedTimestamp = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
       await FirebaseFirestore.instance.collection("Feedback").doc(widget.caretakerId).set({
         "caretakerId": widget.caretakerId,
@@ -82,11 +90,16 @@ class _PatienceFeedbackScreenState extends State<PatienceFeedbackScreen> {
         ])
       }, SetOptions(merge: true));
 
-      Get.snackbar("Success", "Feedback submitted successfully");
-      setState(() => isLoading = false);
+      setState(() {
+        previousFeedback = feedbackController.text;
+        previousTimestamp = formattedTimestamp;
+        isEditing = false;
+      });
+
+      Get.snackbar("Success", "Feedback updated successfully");
     } catch (e) {
-      Get.snackbar("Error", "Failed to submit feedback $e");
-      print("error is $e");
+      Get.snackbar("Error", "Failed to submit feedback");
+    } finally {
       setState(() => isLoading = false);
     }
   }
@@ -102,18 +115,59 @@ class _PatienceFeedbackScreenState extends State<PatienceFeedbackScreen> {
           children: [
             Text("Your Feedback:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
-            TextField(
-              controller: feedbackController,
-              maxLines: 5,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: "Write your feedback here...",
+
+            // Show Previous Feedback if exists and not editing
+            if (!isEditing && previousFeedback != null)
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(previousFeedback!,
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                      SizedBox(height: 5),
+                      Text(
+                        previousTimestamp ?? "",
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+
+            // Show Text Field only if Editing
+            if (isEditing)
+              TextField(
+                controller: feedbackController,
+                maxLines: 5,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: "Edit your feedback...",
+                ),
+              ),
+
             SizedBox(height: 16),
+
+            // Toggle Button
             ElevatedButton(
-              onPressed: isLoading ? null : submitFeedback,
-              child: isLoading ? CircularProgressIndicator() : Text("Submit Feedback"),
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      if (isEditing) {
+                        submitFeedback();
+                      } else {
+                        setState(() {
+                          isEditing = true;
+                          feedbackController.text = previousFeedback ?? ""; // Show previous feedback in the field
+                        });
+                      }
+                    },
+              child: isLoading
+                  ? CircularProgressIndicator()
+                  : Text(isEditing ? "Submit Feedback" : "New Feedback"),
             ),
           ],
         ),
