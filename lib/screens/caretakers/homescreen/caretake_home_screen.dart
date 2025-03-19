@@ -12,7 +12,7 @@ import 'package:p_care/screens/caretakers/homescreen/patient_view_screen.dart';
 import 'package:p_care/services/caretakers/c_auth_controller.dart';
 import 'package:p_care/services/caretakers/profileimage_controller.dart';
 import 'patient_report_screen.dart';
-//import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class CareTakerHomeScreen extends StatefulWidget {
@@ -62,56 +62,51 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
     _listenForNewNeeds();
   }
 
-  void _listenForNewNeeds() {
-    FirebaseFirestore.instance.collection('Needs').snapshots().listen((snapshot) {
-      int count = snapshot.docs.length;
-      setState(() {
-        newNeedsCount = count; // ✅ Update count
-      });
+  void _listenForNewNeeds() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  int lastSeenNeeds = prefs.getInt('lastSeenNeedsCount') ?? 0;
+
+  FirebaseFirestore.instance.collection('Needs').snapshots().listen((snapshot) {
+    int currentCount = snapshot.docs.length;
+
+    setState(() {
+      // Show red dot only if there are new needs beyond the last seen count
+      newNeedsCount = (currentCount > lastSeenNeeds) ? currentCount : -1;
     });
-  }
+  });
+}
+
 
   // Method to handle tap on dashboard items
-  void handleTap(int id, BuildContext context) {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      return;
-    }
-    switch (id) {
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => PatientsScreen()),
-        );
-        break;
-      case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => PatientsViewScreen()),
-        );
-        break;
-      case 3:
+  void handleTap(int id, BuildContext context) async {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
 
-        // ✅ Hide the red dot when "Patients Needs" is opened
-        setState(() {
-        newNeedsCount = -1; // Use -1 to indicate no badge
-       });
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => CaretakerNeedsScreen()),
-        );
-        break;
-      case 4:
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => CareTakerFeedbackViewScreen(
-                    caretakerId: user.uid,
-                  )),
-        );
-      default:
-    }
+  if (id == 3) {
+    // Store the current needs count as the last seen count
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('lastSeenNeedsCount', newNeedsCount);
+
+    // ✅ Hide the red dot after opening "Patients Needs"
+    setState(() {
+      newNeedsCount = -1;
+    });
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CaretakerNeedsScreen()),
+    );
+  } else if (id == 1) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => PatientsScreen()));
+  } else if (id == 2) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => PatientsViewScreen()));
+  } else if (id == 4) {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) => CareTakerFeedbackViewScreen(caretakerId: user.uid),
+    ));
   }
+}
+
 
   // Method to fetch the current user's name and email
   Future<Map<String, String?>> getCurrentUserDetails() async {

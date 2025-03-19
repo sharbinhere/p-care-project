@@ -5,6 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ProfileController extends GetxController {
   var profileImages = <String, String>{}.obs; // Map to store images per user
 
+  @override
+  void onInit() {
+    super.onInit();
+    fetchProfileImage(); // Fetch profile image when the controller is initialized
+  }
+
   void fetchProfileImage() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
