@@ -198,6 +198,7 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
                     Get.to(CareTakerProfileScreen()); // Close the drawer
                   },
                 ),
+                Divider(),
                 ListTile(
                   leading: const Icon(Icons.logout,
                       color: Color.fromARGB(255, 37, 100, 228)),
@@ -208,26 +209,7 @@ class _CareTakerHomeScreenState extends State<CareTakerHomeScreen> {
                     showSignOutDialog();
                   },
                 ),
-                ListTile(
-                  leading: const Icon(Icons.notification_add,
-                      color: Color.fromARGB(255, 37, 100, 228)),
-                  title: const Text('Notification',
-                      style:
-                          TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
-                  onTap: () {
-                    Get.to(AboutUsScreen()); // Close the drawer
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.help,
-                      color: Color.fromARGB(255, 37, 100, 228)),
-                  title: const Text('About us',
-                      style:
-                          TextStyle(color: Color.fromARGB(255, 37, 100, 228))),
-                  onTap: () {
-                    Get.to(AboutUsScreen()); // Close the drawer
-                  },
-                ),
+                
               ],
             );
           },

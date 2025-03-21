@@ -58,7 +58,7 @@ class CareTakerProfileScreenState extends State<CareTakerProfileScreen> {
       _address = userDoc['address'] ?? 'Not provided';
       _age = userDoc['age'] ?? 'Not provided';
       _phone = userDoc['phone'] ?? 'Not provided';
-      _imageBase64 = userDoc['profileImage'] ?? null;
+     // _imageBase64 = userDoc['profileImage'] ?? null;
       _isLoading = false;
     });
 
@@ -92,7 +92,7 @@ class CareTakerProfileScreenState extends State<CareTakerProfileScreen> {
               .doc(user.uid)
               .update({'profileImage': base64String});
 
-          Get.find<PatienceProfileController>()
+          Get.find<ProfileController>()
               .updateProfileImage(base64String);
         }
       }

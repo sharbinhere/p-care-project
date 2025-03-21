@@ -40,33 +40,34 @@ class PatientProfileScreenState extends State<PatientProfileScreen> {
   String? _imageBase64;
 
   Future<void> _fetchUserDetails() async {
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user == null) {
-    print("No user is signed in");
-    return;
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print("No user is signed in");
+      return;
+    }
+
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('Patients')
+        .doc(user.uid)
+        .get();
+
+    if (userDoc.exists) {
+      setState(() {
+        _name = userDoc['name'] ?? 'Not provided';
+        _email = user.email ?? 'Not provided';
+        _address = userDoc['address'] ?? 'Not provided';
+        _age = userDoc['age'] ?? 'Not provided';
+        _phone = userDoc['phone'] ?? 'Not provided';
+
+        // ✅ If profileImage is missing, set _imageBase64 to an empty string
+        //_imageBase64 = userDoc['profileImage'] ?? "";
+        _isLoading = false;
+      });
+
+      // ✅ Fetch profile image safely
+      _profileController.fetchProfileImage();
+    }
   }
-
-  DocumentSnapshot userDoc = await FirebaseFirestore.instance
-      .collection('Patients')
-      .doc(user.uid)
-      .get();
-
-  if (userDoc.exists) {
-    setState(() {
-      _name = userDoc['name'] ?? 'Not provided';
-      _email = user.email ?? 'Not provided';
-      _address = userDoc['address'] ?? 'Not provided';
-      _age = userDoc['age'] ?? 'Not provided';
-      _phone = userDoc['phone'] ?? 'Not provided';
-      _imageBase64 = userDoc['profileImage'] ?? null;
-      _isLoading = false;
-    });
-
-    // ✅ Fetch profile image when loading user details
-    _profileController.fetchProfileImage();
-  }
-}
-
 
   Future<void> _pickImage() async {
     final XFile? pickedFile =
@@ -180,7 +181,8 @@ class PatientProfileScreenState extends State<PatientProfileScreen> {
   }
 
   // Build an editable field widget
-  Widget _buildEditableField(String label, String value, String fieldName, IconData icon) {
+  Widget _buildEditableField(
+      String label, String value, String fieldName, IconData icon) {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -266,17 +268,18 @@ class PatientProfileScreenState extends State<PatientProfileScreen> {
                               ),
                               child: Obx(() {
                                 String currentUserId =
-                                    FirebaseAuth.instance.currentUser?.uid ?? "";
-                                String base64Image =
-                                    _profileController.getProfileImage(currentUserId);
+                                    FirebaseAuth.instance.currentUser?.uid ??
+                                        "";
+                                String base64Image = _profileController
+                                    .getProfileImage(currentUserId);
 
                                 return CircleAvatar(
                                   radius: 60,
                                   backgroundColor: Colors.grey[200],
-                                  backgroundImage: base64Image.isNotEmpty
+                                  backgroundImage: (base64Image.isNotEmpty)
                                       ? MemoryImage(base64Decode(base64Image))
                                       : AssetImage('assets/default-avatar.png')
-                                          as ImageProvider,
+                                          as ImageProvider, // Default avatar
                                 );
                               }),
                             ),
@@ -312,7 +315,7 @@ class PatientProfileScreenState extends State<PatientProfileScreen> {
                         Text(
                           _name,
                           style: TextStyle(
-                            fontSize: 24, 
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -321,7 +324,7 @@ class PatientProfileScreenState extends State<PatientProfileScreen> {
                         Text(
                           _email,
                           style: TextStyle(
-                            fontSize: 16, 
+                            fontSize: 16,
                             color: Colors.white.withOpacity(0.9),
                           ),
                         ),
@@ -334,21 +337,27 @@ class PatientProfileScreenState extends State<PatientProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 8),
                           child: Text(
                             'Personal Information',
                             style: TextStyle(
-                              fontSize: 18, 
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.grey[800],
                             ),
                           ),
                         ),
-                        _buildEditableField('Name', _name, 'Name', Icons.person),
-                        _buildEditableField('Email', _email, 'Email', Icons.email),
-                        _buildEditableField('Phone', _phone, 'Phone', Icons.phone),
-                        _buildEditableField('Age', _age, 'Age', Icons.calendar_today),
-                        _buildEditableField('Address', _address, 'Address', Icons.location_on),
+                        _buildEditableField(
+                            'Name', _name, 'Name', Icons.person),
+                        _buildEditableField(
+                            'Email', _email, 'Email', Icons.email),
+                        _buildEditableField(
+                            'Phone', _phone, 'Phone', Icons.phone),
+                        _buildEditableField(
+                            'Age', _age, 'Age', Icons.calendar_today),
+                        _buildEditableField(
+                            'Address', _address, 'Address', Icons.location_on),
                       ],
                     ),
                   ),

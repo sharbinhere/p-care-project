@@ -541,7 +541,7 @@ class _PatientsHomeScreenState extends State<PatientsHomeScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  "+1 234 567 890",
+                  "7736389839",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),

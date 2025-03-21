@@ -26,7 +26,7 @@ class PatiantAuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String? verificationId;
 
-  // Account creation with OTP verification
+  
   signUp()async{
     try{
       loading.value=true;

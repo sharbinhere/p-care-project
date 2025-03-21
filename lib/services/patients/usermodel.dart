@@ -13,6 +13,7 @@ class PatiantUsermodel {
     this.pass,
     this.conf_pass,
     
+    
     });
 
     factory PatiantUsermodel.fromMap(DocumentSnapshot map){
@@ -26,7 +27,8 @@ class PatiantUsermodel {
         diagnosis: map["diagnosis"],
         pass: map["pass"],
         conf_pass: map["confirm pass"],
-        phone: map["phone"]
+        phone: map["phone"],
+        
         
       );
     }
@@ -41,7 +43,8 @@ class PatiantUsermodel {
         "diagnosis" : diagnosis,
         "pass" : pass,
         "confirm pass" : conf_pass,
-        "phone" : phone
+        "phone" : phone,
+        
         
       };
     }

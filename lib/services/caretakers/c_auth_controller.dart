@@ -120,7 +120,7 @@ class CaretakerAuthController extends GetxController {
           transition: Transition.fade, duration: Duration(milliseconds: 650));
       loading.value = false;
     } catch (e) {
-      Get.snackbar("Error occured", "$e",
+      Get.snackbar("Error occured", "Incorrect user details",
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Color.fromARGB(255, 37, 100, 228),
           colorText: Colors.white);
