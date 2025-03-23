@@ -4,9 +4,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:p_care/services/patients/patient_list_controller.dart';
 
-class PatientsScreen extends StatelessWidget {
+class PatientsScreen extends StatefulWidget {
+  @override
+  State<PatientsScreen> createState() => _PatientsScreenState();
+}
+
+class _PatientsScreenState extends State<PatientsScreen> {
   final PatienceListController patienceListController =
       Get.find<PatienceListController>();
+
+      
 
   /// Function to delete a patient and related data
   Future<void> deletePatient(String patientId) async {
@@ -120,7 +127,15 @@ class PatientsScreen extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            
+                            CircleAvatar(
+                              backgroundColor: Colors.blue.shade50,
+                              radius: 24,
+                              child: Icon(
+                                Icons.person,
+                                color: Colors.blue.shade700,
+                                size: 28,
+                              ),
+                            ),
                             SizedBox(width: 12),
                             Expanded(
                               child: Column(
@@ -169,6 +184,7 @@ class PatientsScreen extends StatelessWidget {
                                         onPressed: () async {
                                           Navigator.of(ctx).pop();
                                           await deletePatient(patientId);
+                                          Get.forceAppUpdate();  
                                         },
                                       ),
                                     ],
